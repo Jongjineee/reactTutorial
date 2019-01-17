@@ -1,35 +1,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import { SourceMapGenerator } from '../../../../Library/Caches/typescript/3.1/node_modules/source-map/source-map';
 
-class Square extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: null,
-    };
-  }
-
-  render() {
-    return (
-      <button
-        className="square" 
-        onClick={() => this.setState({value: 'X'})}
-      >
-        {this.state.value}
-      </button>
-    );
-  }
+function Square(props){
+  return (
+    <button className="square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
 }
 
 class Board extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+      xlsNext: true,
+    };
+  }
+
+  handleClick(i){
+    const squares = this.state.squares.slice();
+    squares[i] = this.state.xlsNext ? 'X':'O'
+    this.setState({
+      squares: squares,
+      xlsNext: !this.state.xlsNext,
+    });
+  }
+
   renderSquare(i) {
-    return <Square value={i} />;
+    return (
+      <Square 
+        value={this.state.squares[i]}
+        onClick={() => this.handleClick(i)}
+      />
+    );
   }
 
   render() {
-    const status = 'Next player: X';
-
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      const status = 'Next player:' + (this.state.xlsNext ? 'X':'O');
+    }
+    
     return (
       <div>
         <div className="status">{status}</div>
@@ -69,9 +86,38 @@ class Game extends React.Component {
   }
 }
 
+function calculateWinner(squares){
+  const lines = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [0,4,8],
+    [2,4,6],
+  ];
+  for (let i = 0; i < lines.length; i++){
+    const [a,b,c] = lines[i];
+    if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+      return squares[a];
+    }
+  }
+  return null;
+}
 // ========================================
 
 ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
+
+// Data Change with Mutation
+var player = {score : 1, name : 'jongjin'};
+player.score = 2;
+
+// Data Change without Mutation
+var newPlayer = Object.assign({}, player, {score: 2});
+
+// ========================================
+
